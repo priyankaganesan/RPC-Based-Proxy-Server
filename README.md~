@@ -1,7 +1,6 @@
 # RPC-Based-Proxy-Server
 
 //Yo!!! Pls Don't use python style comments
-//Sorry my bad!!!
 
 //This is a file that provides the commands necessary to run client and server programs.
 
@@ -19,13 +18,3 @@ g++ -Wall -I/usr/local/include/thrift -c my_thrift_file_constants.cpp -o constan
 g++ -Wall -I/usr/local/include/thrift -c my_thrift_file_types.cpp -o types.o
 
 
-//Compiling Client
-g++ -Wall -I/usr/local/include/thrift -c Something_client.cpp -o client.o
-
-//Linking Server
-g++ -L/usr/local/lib server.o something.o constants.o types.o -o Something_server -lthrift
-
-//Linking Client
-g++ -L/usr/local/lib client.o something.o constants.o types.o -o Something_client -lthrift
-
-//For running pls use common sense!! :D
