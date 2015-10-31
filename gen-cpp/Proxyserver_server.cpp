@@ -7,15 +7,49 @@
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
 #include <string.h>
+#include <iostream>
+#include <cstring>
+#include <curl/curl.h>
+#include <sys/select.h>
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
+using namespace std;
 
 using boost::shared_ptr;
 
 using namespace  ::Test;
+
+
+ struct MemoryStruct {
+    char *memory;
+    size_t size;
+ };
+
+
+
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  size_t realsize = size * nmemb;
+  MemoryStruct *mem = (MemoryStruct *)userp;
+ 
+  mem->memory = (char*) realloc(mem->memory, mem->size + realsize + 1);
+  if(mem->memory == NULL) {
+    /* out of memory! */ 
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+ 
+  memcpy(&(mem->memory[mem->size]), contents, realsize);
+  mem->size += realsize;
+  mem->memory[mem->size] = 0;
+ 
+  return realsize;
+}
+
+
 
 class ProxyserverHandler : virtual public ProxyserverIf {
  public:
@@ -24,14 +58,56 @@ class ProxyserverHandler : virtual public ProxyserverIf {
   }
 
   void request(Response& _return, const std::string& url) {
-    // Your implementation goes here
-    printf("request\n");
-  }
+
+    CURL *curl_handle;
+    CURLcode res;
+    MemoryStruct chunk;
+
+      /* Get a curl handle.  Each thread will need a unique handle. */
+    curl_handle = curl_easy_init();
+    if(NULL != curl_handle) {
+      chunk.memory = (char*) malloc(1024);  /* will be grown as needed by the realloc above */ 
+      chunk.size = 0;    /* no data at this point */ 
+      /*Allow redirection*/
+      curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+      /*Timeout for connections, in seconds*/
+      curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 30L);
+      /* Set the URL for the operation. */
+      curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+      /* "write_data" function to call with returned data. */
+      curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+      /* userp parameter passed to write_data. */
+      curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)&chunk);
+      /* Actually perform the query. */
+      res = curl_easy_perform(curl_handle);
+      /* Check the return value and do whatever. */
+
+      /* Clean up after ourselves. */
+      curl_easy_cleanup(curl_handle);
+      cout<<chunk.memory;
+    }
+    else {
+      fprintf(stderr, "Error: could not get CURL handle.\n");
+      exit(EXIT_FAILURE);
+    }
+
+//     Write the content to stdout. 
+//    curl_return.assign(wdi.data, wdi.len);
+    if(res==0)
+    {
+      _return.response_code=0;
+      _return.doc.assign(chunk.memory, chunk.size);
+    }
+
+    free(chunk.memory);
+  
+}
 
   void shutdown() {
     // Your implementation goes here
     printf("shutdown\n");
   }
+
 
 };
 

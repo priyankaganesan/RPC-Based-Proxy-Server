@@ -25,9 +25,9 @@ int main(int argc, char **argv) {
   ProxyserverClient client(protocol);
   transport->open();
   client.request(webpage,"www.google.com");
-  cout<<webpage.doc;
+  cout<<endl<<webpage.doc;
+  cout<<endl<<webpage.response_code;
   transport->close();
-  printf("\ndsijofijsoifjsoifjsdoijfjd");
   return 0;
 }
 
