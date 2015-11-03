@@ -3,7 +3,10 @@
 #include <map>
 #include <vector>
 #include <stdlib.h>
+
 #define CACHE_MAX_SIZE 1048576
+
+using namespace std;
 
 class Random
 {

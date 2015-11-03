@@ -3,8 +3,6 @@
 #include <map>
 #include "Queue.h"
 
-//#define Q_MAX_SIZE 1048576
-
 class fifo
 {
 	Queue fifo_queue;

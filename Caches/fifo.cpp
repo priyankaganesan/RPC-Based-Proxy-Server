@@ -55,8 +55,6 @@ int fifo::insert(string url, string response)
 	node->size = response_size;
 	fifo_queue.push(node);
 	url_to_node[url] = node;
-//	cout<<(url_to_node[url])->url)<<endl;
-//	cout<<(url_to_node[url])->data)<<endl;
 	current_size += response_size;
 	cout<<"Response size is   "<<response_size;
 	cout<<"Current size is    "<<current_size;
@@ -65,8 +63,10 @@ int fifo::insert(string url, string response)
 
 void fifo::remove_node()
 {
+	Queue_node *node = new Queue_node();
+	node = fifo_queue.front_node();
 	fifo_queue.remove_front();
-	current_size -= (url_to_node[url])->size;
+	current_size -= node->size;
 	url_to_node.erase((url_to_node[url])->url);
 }
 
