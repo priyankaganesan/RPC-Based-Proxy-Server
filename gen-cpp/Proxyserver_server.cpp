@@ -2,6 +2,8 @@
 // You should copy it to another filename to avoid overwriting it.
 
 #include "Proxyserver.h"
+#include "../Caches/LRU_cache.h"
+//#include "../Caches/fifo.h"
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -59,10 +61,34 @@ class ProxyserverHandler : virtual public ProxyserverIf {
 
   void request(Response& _return, const std::string& url) {
 
+
+    LRU_cache cache;
+//    fifo cache;
+    string data;
+
+    /* Respose codes
+    ) 
+    0 - LibCurl FAIL!!!! :P
+    1 - HIT in cache
+    2 _ MISS in cache - Inserted successfully
+    3  "      " - Unsuccessful insertion
+
+
+    */
+
+    cout<<endl<<url;
+
+    if(cache.access_cache(url,data))
+    {
+      _return.doc=data;
+      _return.response_code=1;
+      return;
+    }
+
+
     CURL *curl_handle;
     CURLcode res;
     MemoryStruct chunk;
-
       /* Get a curl handle.  Each thread will need a unique handle. */
     curl_handle = curl_easy_init();
     if(NULL != curl_handle) {
@@ -84,7 +110,7 @@ class ProxyserverHandler : virtual public ProxyserverIf {
 
       /* Clean up after ourselves. */
       curl_easy_cleanup(curl_handle);
-      cout<<chunk.memory;
+ //     cout<<chunk.memory;
     }
     else {
       fprintf(stderr, "Error: could not get CURL handle.\n");
@@ -95,8 +121,24 @@ class ProxyserverHandler : virtual public ProxyserverIf {
 //    curl_return.assign(wdi.data, wdi.len);
     if(res==0)
     {
+      data.assign(chunk.memory,chunk.size);
+      
+      if(cache.insert(url,data))
+      {
+        _return.response_code=2;
+        _return.doc=data;
+      }
+      else
+      {
+        _return.response_code=3;
+        _return.doc="a";
+      }
+    }
+    else
+    {
+      _return.doc="";
       _return.response_code=0;
-      _return.doc.assign(chunk.memory, chunk.size);
+      return;
     }
 
     free(chunk.memory);
