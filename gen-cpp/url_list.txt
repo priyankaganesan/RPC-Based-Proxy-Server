@@ -8,6 +8,9 @@ amazon.com
 wikipedia.org
 twitter.com
 google.co.in
+taobao.com
+live.com
+sina.com.cn
 yahoo.com
 linkedin.com
 yahoo.co.jp

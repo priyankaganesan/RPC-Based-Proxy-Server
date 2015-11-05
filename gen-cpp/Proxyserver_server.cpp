@@ -2,9 +2,8 @@
 // You should copy it to another filename to avoid overwriting it.
 
 #include "Proxyserver.h"
-// #include "../Caches/LRU_cache.h"
-#include "../Caches/fifo.h"
-#include "../Caches/Random.h"
+#include "../Caches/LRU_cache.h"
+//#include "../Caches/fifo.h"
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
@@ -26,15 +25,12 @@ using boost::shared_ptr;
 using namespace  ::Test;
 
 
-struct MemoryStruct {
-  char *memory;
-  size_t size;
-};
+ struct MemoryStruct {
+    char *memory;
+    size_t size;
+ };
 
-// LRU_cache cache;
-// fifo cache;
-Random cache;
-
+LRU_cache cache;
 
 static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -65,6 +61,9 @@ class ProxyserverHandler : virtual public ProxyserverIf {
 
   void request(Response& _return, const std::string& url) {
 
+
+
+//    fifo cache;
     string data;
 
     /* Respose codes

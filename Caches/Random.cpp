@@ -28,7 +28,6 @@ int Random::url_exists(string url)
 
 int Random::access_cache(string url, string &response)
 {
-	cout<<"url_exists(url)"<<url_exists(url);
 	if(url_exists(url)){
 		response = url_to_response[url];
 		return 1;
@@ -38,7 +37,6 @@ int Random::access_cache(string url, string &response)
 
 int Random::insert(string url, string response)
 {
-	cout<<endl<<"Insertion happening";
 	int response_size = response.length();
 	if (response_size > max_size){
 		return 0;
@@ -47,12 +45,8 @@ int Random::insert(string url, string response)
 		remove_node();
 	}
 	url_to_response[url] = response;
-	cout<<url<<endl;
-	cout<<url_to_response[url]<<endl;
 	current_size += response_size;
 	url_list.push_back(url);
-	cout<<"Response size is   "<<response_size;
-	cout<<"Current size is    "<<current_size;
 	return 1;
 }
 
